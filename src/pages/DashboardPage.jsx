@@ -10,12 +10,12 @@ import { useNavigate } from 'react-router-dom'
 import { message, Image, Button, Row, Col, Card } from 'antd'
 import { logoutUser, deleteUser } from '../api/authApi'
 
+const apiUrl = import.meta.env.VITE_API_URL
+
 const handleLogout = async (navigate) => {
-    // Implementasi logoutUser jika ada
     try {
         await logoutUser()
         message.success('Logout successful!')
-        localStorage.removeItem('access_token')
         navigate('/')
     } catch (error) {
         message.error('Logout failed. Please try again.')
@@ -27,7 +27,6 @@ const handleDeleteAccount = async (navigate) => {
     try {
         await deleteUser()
         message.success('Delete account successful!')
-        localStorage.removeItem('access_token')
         navigate('/')
     } catch (error) {
         message.error('Delete account failed. Please try again.')
@@ -57,6 +56,9 @@ function DashboardPage() {
     if (!user) return null
     if (error) return <div>Error: {error}</div>
 
+    const profile = user.profile_picture
+    console.log(profile)
+
     return (
         <Row
             justify="center"
@@ -65,13 +67,10 @@ function DashboardPage() {
         >
             <Col xs={24} sm={20} md={16} lg={12} xl={10}>
                 <Card title={user.username}>{user.email}</Card>
-                <p>Profile: {user.profile_picture}</p>
+                <p>Profile: {profile}</p>
                 <Image
                     width={200}
-                    src={
-                        `http://localhost:81/${user.profile_picture}` ||
-                        '/mypp.png'
-                    }
+                    src={profile ? `${apiUrl}${profile}` : '/default.jpg'}
                 />
                 <br /> <br /> <br />
                 <Button

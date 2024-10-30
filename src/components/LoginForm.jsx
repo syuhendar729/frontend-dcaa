@@ -7,12 +7,8 @@ const onFinish = async (values, navigate) => {
     formData.append('password', values.password)
 
     try {
-        const token = await loginUser(formData)
+        await loginUser(formData)
         message.success('Login successful!')
-        console.log('Access token:', token)
-
-        localStorage.setItem('access_token', token)
-
         navigate('/dashboard')
     } catch (error) {
         message.error(

@@ -1,7 +1,8 @@
 import { Navigate } from 'react-router-dom'
+import { getCookie } from '../utils/cookieUtils'
 
 function PrivateRoute({ children }) {
-    const token = localStorage.getItem('access_token')
+    const token = getCookie('access_token')
     if (!token) {
         return <Navigate to="/" replace />
     }

@@ -1,8 +1,11 @@
 // authApi.js
+import { setCookie, getCookie, deleteCookie } from '../utils/cookieUtils'
+const apiUrl = import.meta.env.VITE_API_URL
+
 export const registerUser = async (formData) => {
     console.log(formData)
     try {
-        const response = await fetch('http://localhost:81/user', {
+        const response = await fetch(`${apiUrl}/user`, {
             method: 'POST',
             body: formData,
             headers: {},
@@ -27,7 +30,7 @@ export const registerUser = async (formData) => {
 
 export const loginUser = async (formData) => {
     try {
-        const response = await fetch('http://localhost:81/login', {
+        const response = await fetch(`${apiUrl}/login`, {
             method: 'POST',
             body: formData,
         })
@@ -39,8 +42,9 @@ export const loginUser = async (formData) => {
             throw new Error('Response failed')
         }
 
-        const data = await response.json()
-        return data.data.access_token // Mengembalikan access_token saja
+        const result = await response.json()
+        setCookie('access_token', result.data.access_token, 1)
+        return result
     } catch (error) {
         console.error('Error during login:', error)
         throw error
@@ -48,11 +52,11 @@ export const loginUser = async (formData) => {
 }
 
 export const fetchUserData = async () => {
-    const token = localStorage.getItem('access_token')
+    const token = getCookie('access_token')
     if (!token) throw new Error('No token found')
 
     try {
-        const response = await fetch('http://localhost:81/user', {
+        const response = await fetch(`${apiUrl}/user`, {
             method: 'GET',
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -70,11 +74,11 @@ export const fetchUserData = async () => {
 }
 
 export const logoutUser = async () => {
-    const token = localStorage.getItem('access_token')
+    const token = getCookie('access_token')
     if (!token) throw new Error('No token found')
 
     try {
-        const response = await fetch('http://localhost:81/logout', {
+        const response = await fetch(`${apiUrl}/logout`, {
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -84,7 +88,7 @@ export const logoutUser = async () => {
         if (!response.ok) {
             throw new Error('Failed to log out')
         }
-
+        deleteCookie('access_token')
         return response.message
     } catch (error) {
         console.error('Error during logout:', error)
@@ -93,7 +97,7 @@ export const logoutUser = async () => {
 }
 
 export const updateUser = async (formData) => {
-    const token = localStorage.getItem('access_token')
+    const token = getCookie('access_token')
     if (!token) throw new Error('No token found')
     console.log(formData)
 
@@ -103,8 +107,8 @@ export const updateUser = async (formData) => {
     }
 
     try {
-        const response = await fetch('http://localhost:81/user', {
-            method: 'PATCH', // Menggunakan PUT untuk update data user
+        const response = await fetch(`${apiUrl}/user`, {
+            method: 'PATCH',
             body: formData,
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -125,7 +129,7 @@ export const updateUser = async (formData) => {
 }
 
 export const resetPassword = async (formData) => {
-    const token = localStorage.getItem('access_token')
+    const token = getCookie('access_token')
     if (!token) throw new Error('No token found')
     console.log(formData)
     // Debug: cetak isi formData
@@ -134,7 +138,7 @@ export const resetPassword = async (formData) => {
     }
 
     try {
-        const response = await fetch('http://localhost:81/reset-password', {
+        const response = await fetch(`${apiUrl}/reset-password`, {
             method: 'PUT', // Menggunakan PUT untuk update data user
             body: formData,
             headers: {
@@ -156,11 +160,11 @@ export const resetPassword = async (formData) => {
 }
 
 export const deleteUser = async () => {
-    const token = localStorage.getItem('access_token')
+    const token = getCookie('access_token')
     if (!token) throw new Error('No token found')
 
     try {
-        const response = await fetch('http://localhost:81/user', {
+        const response = await fetch(`${apiUrl}/user`, {
             method: 'DELETE',
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -171,6 +175,7 @@ export const deleteUser = async () => {
             throw new Error('Failed to delete user.')
         }
 
+        deleteCookie('access_token')
         return response.message
     } catch (error) {
         console.error('Error during delete:', error)
